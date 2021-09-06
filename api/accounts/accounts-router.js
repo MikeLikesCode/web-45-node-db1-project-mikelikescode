@@ -1,51 +1,65 @@
-const router = require('express').Router()
-const Accounts = require('./accounts-model');
-const { checkAccountPayload, checkAccountId, checkAccountNameUnique } = require('./accounts-middleware');
+const router = require("express").Router();
+const Accounts = require("./accounts-model");
+const {
+  checkAccountPayload,
+  checkAccountId,
+  checkAccountNameUnique,
+} = require("./accounts-middleware");
 
-router.get('/', async (req, res, next) => {
-  try{
+router.get("/", async (req, res, next) => {
+  try {
     const accounts = await Accounts.getAll();
     res.status(200).json(accounts);
+  } catch (err) {
+    next(err);
   }
-  catch(err){
-    next(err)
-  }
-})
+});
 
-router.get('/:id', checkAccountId, async (req, res, next) => {
+router.get("/:id", checkAccountId, async (req, res, next) => {
   res.json(req.account);
-})
-
-router.post('/', checkAccountPayload , checkAccountNameUnique, (req, res, next) => {
-
-  Accounts.create(req.body)
-  .then(all => {
-    console.log(all)
-    res.status(201).json(all);
-  })
-  .catch(next)
 });
 
+router.post(
+  "/",
+  checkAccountPayload,
+  checkAccountNameUnique,
+  (req, res, next) => {
+    const newAccount = {
+      name: req.body.name.trim(),
+      budget: req.body.budget,
+    };
 
-router.put('/:id', checkAccountId, checkAccountPayload, async (req, res, next) => {
-  try{
-    await Accounts.updateById(req.params.id, req.body);
-    res.status(200).json(req.body)
+    Accounts.create(newAccount)
+      .then((all) => {
+        console.log(all);
+        res.status(201).json(all);
+      })
+      .catch(next);
   }
-  catch(err){
-    next(err)
+);
+
+router.put(
+  "/:id",
+  checkAccountId,
+  checkAccountPayload,
+  async (req, res, next) => {
+    try {
+      await Accounts.updateById(req.params.id, req.body);
+      res.status(200).json(req.body);
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
+router.delete("/:id", checkAccountId, async (req, res, next) => {
+  try {
+    const deletedAccount = await Accounts.deleteById(req.params.id);
+    res.status(200).json(deletedAccount);
+  } catch (err) {
+    next(err);
   }
 });
-
-router.delete('/:id', checkAccountId, async (req, res, next) => {
-    try{
-      const deletedAccount = await Accounts.deleteById(req.params.id);
-      res.status(200).json(deletedAccount)
-    }
-    catch(err){
-      next(err)
-    }
-})
 
 // eslint-disable-next-line
 router.use((err, req, res, next) => {
