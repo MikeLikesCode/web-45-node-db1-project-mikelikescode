@@ -7,12 +7,10 @@ const getById = id => {
   return db('accounts').where('id', id).first();
 }
 
-const create = async (account) => {
-  return await db('accounts')
-    .insert(account)
-    .then(id => {
-      return getById(id[0])
-    })
+const create = account => {
+  return db('accounts')
+  .insert(account)
+  .then(([id]) => getById(id))
 }
 
 const updateById = (id, account) => {
@@ -25,7 +23,7 @@ const updateById = (id, account) => {
 }
 
 const deleteById = id => {
-  return db('users')
+  return db('accounts')
     .where({ id })
     .del();
 }

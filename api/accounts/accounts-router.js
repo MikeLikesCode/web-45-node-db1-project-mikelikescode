@@ -16,28 +16,35 @@ router.get('/:id', checkAccountId, async (req, res, next) => {
   res.json(req.account);
 })
 
-router.post('/', checkAccountPayload, checkAccountNameUnique,  async(req, res, next) => {
-  try{
-    const accounts = await Accounts.create(req.body);
-    res.status(201).json(accounts );    
-  }
-  catch(err){
-    next(err)
-  }
-})
+router.post('/', checkAccountPayload , checkAccountNameUnique, (req, res, next) => {
+
+  Accounts.create(req.body)
+  .then(all => {
+    console.log(all)
+    res.status(201).json(all);
+  })
+  .catch(next)
+});
+
 
 router.put('/:id', checkAccountId, checkAccountPayload, async (req, res, next) => {
   try{
-    const response = Accounts.updateById(req.params.id, req.body);
-    res.status(200).json(response)
+    await Accounts.updateById(req.params.id, req.body);
+    res.status(200).json(req.body)
   }
   catch(err){
     next(err)
   }
 });
 
-router.delete('/:id', (req, res, next) => {
-  // DO YOUR MAGIC
+router.delete('/:id', checkAccountId, async (req, res, next) => {
+    try{
+      const deletedAccount = await Accounts.deleteById(req.params.id);
+      res.status(200).json(deletedAccount)
+    }
+    catch(err){
+      next(err)
+    }
 })
 
 // eslint-disable-next-line
